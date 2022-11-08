@@ -72,6 +72,7 @@ async def login():
         username, password = get_username_password_from_header(request)
         db = await _get_db()
         query = "SELECT username, pwd FROM user WHERE username = :username AND pwd = :pwd"
+        app.logger.info(query), app.logger.warning(query)
         user = await db.fetch_one(query=query, values={"username": username, "pwd": password})
         if not user:
             return jsonify_message("Invalid/ Missing username or password. Send based64(username:password) in Authorization header"), 401, {"WWW-Authenticate": "Basic"}
@@ -105,6 +106,7 @@ async def register():
 
 async def is_user_exists(db, username) -> bool:
     query = "SELECT username FROM user WHERE username = :username"
+    app.logger.info(query), app.logger.warning(query)
     user = await db.fetch_all(query=query, values={"username": username})
     return True if user and len(user) > 0 else False
 
@@ -139,6 +141,7 @@ async def start_game(data: Username):
 
     db =  await _get_db()
     query = "SELECT userid FROM user WHERE username = :username"
+    app.logger.info(query), app.logger.warning(query)
     user = await db.fetch_one(query=query, values={"username": data['username']})
     userid = 0
     if not user:
@@ -147,6 +150,7 @@ async def start_game(data: Username):
         userid = user["userid"]
 
     query = "SELECT * FROM secret_word ORDER BY RANDOM() LIMIT 1"
+    app.logger.info(query), app.logger.warning(query)
     secret_word = await db.fetch_one(query=query)
 
     try:
@@ -174,6 +178,7 @@ async def list_active_games(username):
             LEFT JOIN user ON games.userid = user.userid
             WHERE username = :username AND isActive = 1
             """
+    app.logger.info(query), app.logger.warning(query)
     games = await db.fetch_all(query=query, values={"username": username})
 
     if games:
@@ -189,6 +194,7 @@ async def is_active_game(db, username, gameid) -> bool:
             LEFT JOIN user ON games.userid = user.userid
             WHERE username = :username AND games.gameid = :gameid AND isActive = 1
             """
+    app.logger.info(query), app.logger.warning(query)
     game = await db.fetch_one(query=query, values={"username": username, "gameid": gameid})
     if game:
         return True
@@ -215,6 +221,7 @@ async def retrieve_game(username, gameid):
                 LEFT JOIN games ON guesses.gameid = games.gameid
                 WHERE games.gameid = :gameid AND isActive = 1
                 """
+        app.logger.info(query), app.logger.warning(query)
         guesses = await db.fetch_all(query=query, values={"gameid": gameid})
 
         return calculate_game_status(guesses)
@@ -261,6 +268,7 @@ async def make_guess(username, gameid, data: Guess):
             return jsonify_message(f"Not a valid guess! Please only guess {app.config['WORDLE']['WORDLE_LENGTH']}-letter words. This attempt does not count.")
         else:
             query = "SELECT * FROM valid_words WHERE word = :guess"
+            app.logger.info(query), app.logger.warning(query)
             is_valid = await db.fetch_one(query=query, values={"guess": data["guess"]})
 
             if not is_valid:
@@ -280,6 +288,7 @@ async def make_guess(username, gameid, data: Guess):
         query = """
                 SELECT secretWord AS secret_word FROM games WHERE gameid = :gameid
                 """
+        app.logger.info(query), app.logger.warning(query)
         game = await db.fetch_one(query=query, values={"gameid": gameid})
         secret_word = game.secret_word 
 
@@ -290,6 +299,7 @@ async def make_guess(username, gameid, data: Guess):
                 LEFT JOIN games ON guesses.gameid = games.gameid
                 WHERE games.gameid = :gameid AND isActive = 1
                 """
+        app.logger.info(query), app.logger.warning(query)
         guesses = await db.fetch_all(query=query, values={"gameid": gameid})
         guesses = calculate_game_status(guesses)
 
