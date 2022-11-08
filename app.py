@@ -6,6 +6,8 @@ import databases
 import base64
 import dataclasses
 
+import userService
+
 from typing import Tuple, Optional
 from quart import Quart, jsonify, g, request, abort
 from quart_schema import QuartSchema, validate_request
@@ -24,7 +26,6 @@ class Guess:
 @dataclasses.dataclass
 class Username:
     username: str
-
 
 async def _connect_db():
     database = databases.Database(app.config["DATABASES"]["URL"])
@@ -58,14 +59,16 @@ async def home():
     return jsonify_message("Welcome to wordle!")
 
 
+
+""""
 @app.route("/login", methods=["GET", "POST"])
 async def login():
-    """
+    
     Login
     
     Authenticate user from username & password pass through the header.
-    """
-
+    
+    userService.login(request)
     if request.method == "GET":
         return jsonify_message("Send as POST with based64(username:password) in Authorization header")
     else:
@@ -77,7 +80,7 @@ async def login():
         if not user:
             return jsonify_message("Invalid/ Missing username or password. Send based64(username:password) in Authorization header"), 401, {"WWW-Authenticate": "Basic"}
         return {"authenticated": True}, 200
-
+"""
 
 @app.route("/register", methods=["GET", "POST"])
 async def register():
