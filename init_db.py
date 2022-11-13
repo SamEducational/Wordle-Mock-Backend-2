@@ -1,4 +1,4 @@
-# Initialize database and populate initial values
+# Initialize database and populate initial values:
 
 from databases import Database
 
@@ -6,22 +6,14 @@ import asyncio
 import json
 
 database = Database('sqlite+aiosqlite:///wordle_app.db')
+userDatabase = Database('sqlite+aiosqlite:///user.db')
 
 async def init_db():
-    await database.connect()
+    await userDatabase.connect()
 
     query = "DROP TABLE IF EXISTS user"
-    await database.execute(query=query)
-    query = "DROP TABLE IF EXISTS games"
-    await database.execute(query=query)
-    query = "DROP TABLE IF EXISTS guesses"
-    await database.execute(query=query)
-    query = "DROP TABLE IF EXISTS secret_word"
-    await database.execute(query=query)
-    query = "DROP TABLE IF EXISTS valid_words"
-    await database.execute(query=query)
+    await userDatabase.execute(query=query)
     
-
     query = """
             CREATE TABLE user (
                 userid INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, 
@@ -29,44 +21,11 @@ async def init_db():
                 pwd BLOB NOT NULL
             )
             """
-    await database.execute(query=query)
+    await userDatabase.execute(query=query)
 
-    query = """ 
-            CREATE TABLE games (
-                gameid INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                userid INTEGER NOT NULL,
-                secretWord TEXT NOT NULL,
-                isActive INTEGER DEFAULT 1 NOT NULL,
-                hasWon INTEGER DEFAULT 0 NOT NULL
-            )
-            """
-    await database.execute(query=query)
+    print("User database has been initiailized.")
 
-    query = """
-            CREATE TABLE guesses (
-                guessid INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                gameid INTEGER NOT NULL,
-                guess TEXT NOT NULL,
-                UNIQUE(gameid, guess)
-            )
-            """
-    await database.execute(query=query)
-
-    query = """ 
-            CREATE TABLE secret_word (
-                word TEXT PRIMARY KEY
-            )
-            """
-    await database.execute(query=query)
-
-    query = """ 
-            CREATE TABLE valid_words (
-                word TEXT PRIMARY KEY
-            )
-            """
-    await database.execute(query=query)
-
-
+# Uncomment in main() for this function to be able to execute: (REMEMBER)
 async def populate_tables():
     # fill secret_word and valid_words with words from correct.json and valid.json respectively
     correct_json = open("share/correct.json")
@@ -91,7 +50,7 @@ async def populate_tables():
 
 def main():
     asyncio.run(init_db()) 
-    asyncio.run(populate_tables())
+    # asyncio.run(populate_tables())
 
 if __name__ == "__main__":
     main()
