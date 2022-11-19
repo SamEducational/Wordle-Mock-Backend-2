@@ -1,6 +1,7 @@
 [DATABASES]
 URL = 'sqlite+aiosqlite:///wordle_app.db'
-USER = 'sqlite+aiosqlite:///user.db'
+GAMES = 'sqlite+aiosqlite:///games.db'
+USERS = 'sqlite+aiosqlite:///users.db'
 
 [WORDLE]
 MAX_NUM_ATTEMPTS = 6
